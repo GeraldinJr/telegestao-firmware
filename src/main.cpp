@@ -1,16 +1,5 @@
 #include <Arduino.h>
-
-// PINAGEM
-#define LED 2
-#define BUTTON 4
-#define LDR 14
-#define TEMPERATURE 26
-
-// PARAMETROS GERAIS UTEIS
-#define TEMPO_DEBOUNCE 0
-#define GAMMA 0.7
-#define RL10 50
-#define BETA 3950
+#include "main.h"
 
 // VARIAVEIS
 uint8_t ledState;
@@ -18,10 +7,17 @@ float currentLux;
 float lastLux = 0;
 float currentTemperature;
 float lastTemperature = 25.0;
+float currentCurrent;
+float lastCurrent = 0;
+float currentVoltage;
+float lastVoltage =0;
+
+typedef float (*read_value) (uint8_t);
+typedef uint8_t (*led_by_value) (float);
 
 unsigned long timestamp_ultimo_acionamento = 0;
 
-void IRAM_ATTR muda_status_led(){
+void IRAM_ATTR muda_status_led() {
   if( (millis() - timestamp_ultimo_acionamento) >= TEMPO_DEBOUNCE ) {
 
     ledState = !ledState;
@@ -34,8 +30,9 @@ void IRAM_ATTR muda_status_led(){
   }
 }
 
-float read_lux(uint8_t pin) {
-  int analogValue = analogRead(pin);
+
+float read_lux() {
+  int analogValue = analogRead(LDR);
   float voltage = analogValue / 4096. * 5;
   float resistance = 2000 * voltage / (1 - voltage / 5);
   float lux = pow(RL10 * 1e3 * pow(10, GAMMA) / resistance, (1 / GAMMA));
@@ -45,8 +42,20 @@ float read_lux(uint8_t pin) {
 
 float read_temperature(uint8_t pin) {
   int analogValue = analogRead(pin);
-  float celsius = 1 / (log(1 / (4095. / analogValue - 1)) / BETA + 1.0 / 298.15) - 273.15;
+  float celsius = 1 / (log(1 / (4096. / analogValue - 1)) / BETA + 1.0 / 298.15) - 273.15;
   return celsius;
+}
+
+float read_current(uint8_t pin) {
+  int analogValue = analogRead(pin);
+  float amperes = 5 * analogValue / 4096.;
+  return amperes;
+}
+
+float read_voltage(uint8_t pin) {
+  int analogValue = analogRead(pin);
+  float voltage = 10 * analogValue / 4096.0;
+  return voltage;
 }
 
 uint8_t led_by_lux(float lux) {
@@ -63,7 +72,39 @@ uint8_t led_by_temperature(float temperature) {
   }
 
   return HIGH;
+}
 
+uint8_t led_by_current(float current) {
+  if(current > 2.0) {
+    return LOW;
+  }
+
+  return HIGH;
+}
+
+uint8_t led_by_voltage(float voltage) {
+  if(voltage < 2.5 || voltage > 10) {
+    return LOW;
+  }
+
+  return HIGH;
+}
+
+void taskCheckLux(void *params) {
+  while (1) {
+    currentLux = read_lux();
+
+    if(abs(currentLux - lastLux) > SENSIBILIDADE_LUMINOSIDADE) {
+      Serial.printf("%.2f lx\n", currentLux);
+      ledState = currentLux < 500;
+
+      digitalWrite(LED, ledState);
+
+      lastLux = currentLux;
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(DEFAULT_DELAY_MS));
+  }
 }
 
 void setup() {
@@ -73,26 +114,23 @@ void setup() {
   pinMode(LED, OUTPUT);
   pinMode(LDR, INPUT);
   pinMode(TEMPERATURE, INPUT);
+  //pinMode(CURRENT, INPUT);
+  //pinMode(VOLTAGE, INPUT);
   
   digitalWrite(ledState, LOW);
 
+  interrupts();
   attachInterrupt(BUTTON, muda_status_led, RISING);
+
+  xTaskCreatePinnedToCore(taskCheckLux, "taskCheckLux", 2048, NULL, 1, NULL, APP_CPU_NUM);
+  vTaskDelete(NULL);
 }
 
 void loop() {
-  currentLux = read_lux(LDR);
+
   currentTemperature = read_temperature(TEMPERATURE);
-
-  if(abs(currentLux - lastLux) > 100.) {
-    Serial.printf("%.2f lx\n", currentLux);
-    ledState = led_by_lux(currentLux);
-
-    digitalWrite(LED, ledState);
-
-    lastLux = currentLux;
-  }
-                                                                                       
-  if(abs(currentTemperature - lastTemperature) > 2.) {
+  // CHECK TEMPERATURE                                                                                     
+  if(abs(currentTemperature - lastTemperature) >  SENSIBILIDADE_TEMPERATURA) {
     Serial.printf("%.2f °C\n", currentTemperature);
 
     lastTemperature = currentTemperature;
@@ -113,9 +151,55 @@ void loop() {
       ledState = lastLedState;
       digitalWrite(LED, ledState);
     }
-    
   }
 
-  delay(100);
-  
+  //CHECK CURRENT
+  /*if(abs(currentCurrent - lastCurrent) > SENSIBILIDADE_CORRENTE) {
+    Serial.printf("%.2f A\n", currentCurrent);
+
+    lastCurrent = currentCurrent;
+
+    if(!led_by_current(currentCurrent)){
+      uint8_t lastLedState = ledState;
+      ledState = LOW;
+      digitalWrite(LED, ledState);
+      float current = read_current(CURRENT);
+
+      while (!led_by_current(current)) {
+        current = read_current(CURRENT);
+        Serial.printf("CORRENTE CRITICA: %.2F A\n", current);
+        delay(500);
+      }
+
+      ledState = lastLedState;
+      digitalWrite(LED, ledState);
+    }
+  }
+
+  //CHECK VOLTAGE
+  if(abs(currentVoltage - lastVoltage) > SENSIBILIDADE_TENSAO) {
+    Serial.printf("%.2f V", currentVoltage);
+
+    lastVoltage = currentVoltage;
+
+    if(!led_by_voltage(currentVoltage)) {
+
+      uint8_t lastLedState = ledState;
+      ledState = LOW;
+      digitalWrite(LED, ledState);
+      
+      float voltage = read_voltage(VOLTAGE);
+
+      while (!led_by_voltage(voltage)) {
+        voltage = read_voltage(VOLTAGE);
+        Serial.printf("TENSAO CRITICA: %.2f V\n", voltage);
+        delay(500);
+      }
+
+       ledState = lastLedState;
+      digitalWrite(LED, ledState);
+      
+    }
+  }*/
+
 }
