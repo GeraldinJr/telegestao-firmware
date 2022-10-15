@@ -17,19 +17,20 @@ typedef uint8_t (*led_by_value) (float);
 
 unsigned long timestamp_ultimo_acionamento = 0;
 
-void IRAM_ATTR muda_status_led() {
-  if( (millis() - timestamp_ultimo_acionamento) >= TEMPO_DEBOUNCE ) {
+TaskHandle_t ISR = NULL;
 
+void button_task(void *arg) {
+  while (1) {
+    vTaskSuspend(NULL);
+    Serial.println("[INTERRUPCAO] - BOTAO ACIONADO");
     ledState = !ledState;
-
     digitalWrite(LED, ledState);
 
-    timestamp_ultimo_acionamento = millis();
-
-    Serial.println("[INTERRUPCAO] - BOTAO ACIONADO");
+    vTaskDelay(pdMS_TO_TICKS(TEMPO_DEBOUNCE));
   }
 }
 
+IRAM_ATTR void resumeInterrupt() { xTaskResumeFromISR(ISR); }
 
 float read_lux() {
   int analogValue = analogRead(LDR);
@@ -119,9 +120,12 @@ void setup() {
   
   digitalWrite(ledState, LOW);
 
+  // Interrupção
   interrupts();
-  attachInterrupt(BUTTON, muda_status_led, RISING);
+  attachInterrupt(BUTTON, resumeInterrupt, RISING);
+  xTaskCreate(button_task, "button_task", 4096, NULL, 10, &ISR);
 
+  // Task dos sensores
   xTaskCreatePinnedToCore(taskCheckLux, "taskCheckLux", 2048, NULL, 1, NULL, APP_CPU_NUM);
   vTaskDelete(NULL);
 }
