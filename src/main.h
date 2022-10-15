@@ -1,22 +1,5 @@
-// PINAGEM
-#define LED 15
-#define BUTTON 4
-#define LDR 35
-#define TEMPERATURE 33
-#define CURRENT 25
-#define VOLTAGE 33
-
-// PARAMETROS DOS SENSORES
-#define GAMMA 0.7
-#define RL10 50
-#define BETA 3950
-
-// PARAMETROS DE SENSIBILIDADE
-#define TEMPO_DEBOUNCE 10 //ms
-#define SENSIBILIDADE_LUMINOSIDADE 50 //lux
-#define SENSIBILIDADE_TEMPERATURA 0.5 //°C
-#define SENSIBILIDADE_CORRENTE 0.1 //A
-#define SENSIBILIDADE_TENSAO 0.2 //V
-
-// UTEIS
-#define DEFAULT_DELAY_MS 100
+#include <Arduino.h>
+#include "../lib/led/led.h"
+#include "../lib/luminosidade/luminosidade.h"
+#include "../lib/Log/logs.h"
+#include "../lib/Button/button.h"
