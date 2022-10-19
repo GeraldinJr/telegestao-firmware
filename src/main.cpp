@@ -9,6 +9,7 @@ void setup() {
   initLed();
   initButton();
   initLux();
+  initTemperature();
   
   vTaskDelete(NULL);
 }
