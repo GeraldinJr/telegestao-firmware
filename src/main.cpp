@@ -10,6 +10,8 @@ void setup() {
   initButton();
   initLux();
   initTemperature();
+  initCurrent();
+  initVoltage();
   
   vTaskDelete(NULL);
 }

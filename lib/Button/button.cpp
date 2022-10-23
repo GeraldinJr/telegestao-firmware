@@ -19,5 +19,5 @@ void initButton() {
 
     interrupts();
     attachInterrupt(BUTTON, resumeInterrupt, RISING);
-    xTaskCreate(buttonTask, "buttonTask", 4096, NULL, 10, &ISR);
+    xTaskCreate(buttonTask, "buttonTask", STACK_DEPTH, NULL, 10, &ISR);
 }

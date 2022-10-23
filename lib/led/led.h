@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#define LED 15
+#define LED 2
 
 void initLed();
 void invertLed();

@@ -3,7 +3,7 @@
 #include "../Log/logs.h"
 
 //PIN
-#define TEMPERATURE_PIN 36
+#define TEMPERATURE_PIN 33
 
 #define SENSIBILITY 2.0
 
@@ -12,7 +12,7 @@
 #define MAX_TEMPERATURE 50.
 #define MIN_TEMPERATURE -5.0
 #define TEMPERATURE_DELAY_MS 100
-#define STACK_DEPTH 2048
+#define STACK_DEPTH 4096
 #define TASK_PRIORITY 1
 
 void initTemperature();

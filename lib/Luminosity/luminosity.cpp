@@ -5,11 +5,11 @@ float lastLux = 0;
 
 float read_lux() {
   int analogValue = analogRead(LDR_PIN);
-  float voltage = analogValue * VOLTAGE_COEFFICIENT;
-  float resistance = SENSOR_RESISTANCE * voltage / (1 - voltage / VIN);
-  float lux = pow(RL10 * pow(10, GAMMA) / resistance, INVERSE_GAMMA);
+  //float voltage = analogValue * VOLTAGE_COEFFICIENT;
+  //float resistance = SENSOR_RESISTANCE * voltage / (1 - voltage / VIN);
+  //float lux = pow(RL10 * pow(10, GAMMA) / resistance, INVERSE_GAMMA);
   
-  return lux;
+  return analogValue / 2;
 }
 
 void taskCheckLux(void *params) {
@@ -17,7 +17,7 @@ void taskCheckLux(void *params) {
         currentLux = read_lux();
 
         if(abs(currentLux - lastLux) > SENSIBILIDADE_LUMINOSIDADE) {
-            loginfo("Luminosity: %.2f lx\n", currentLux);
+            loginfo("Luminosity: %.2f lx", currentLux);
             setLed(currentLux < MIN_LUX);
 
             lastLux = currentLux;
