@@ -6,7 +6,7 @@ float lastTemperature = 0;
 float readTemperature() {
   int analogValue = analogRead(TEMPERATURE_PIN);
   //float celsius = 1 / (log(1 / (MAX_ANALOG / analogValue - 1.0)) / BETA + 1.0 / 298.15) - 273.15;
-  return analogValue / 40;
+  return (analogValue / 40) - 25.0;
 }
 
 void taskCheckTemperature(void *params) {
