@@ -2,7 +2,8 @@
 
 float currentCurrent;
 float lastCurrent = 0;
-
+TaskHandle_t ISR = NULL;
+IRAM_ATTR void resumeInterrupt() { xTaskResumeFromISR(ISR); }
 float readCurrent() {
     return 2 * analogRead(CURRENT_PIN) / 4095.;
 }
@@ -30,4 +31,12 @@ void initCurrent() {
     currentCurrent = readCurrent();
 
     xTaskCreatePinnedToCore(taskCheckCurrent, "taskCheckCurrent", STACK_DEPTH, NULL, TASK_PRIORITY, NULL, APP_CPU_NUM);
+}
+
+void initButton() {
+    pinMode(CURRENT_PIN, INPUT);
+
+    interrupts();
+    attachInterrupt(CURRENT_PIN, resumeInterrupt, RISING);
+    xTaskCreate(taskCheckCurrent, "taskCheckCurrent", STACK_DEPTH, NULL, 10, &ISR);
 }
