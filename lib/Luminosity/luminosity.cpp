@@ -1,7 +1,11 @@
 #include "luminosity.h"
+#include <Arduino.h>
+#include "../Led/led.h"
+#include "../Log/logs.h"
 
 float currentLux;
 float lastLux = 0;
+xTaskHandle LUMINOSITY_HANDLE;
 
 float read_lux() {
   int analogValue = analogRead(LDR_PIN);
@@ -27,9 +31,18 @@ void taskCheckLux(void *params) {
     }
 }
 
+void resumeLuminosityTask() {
+    vTaskResume(LUMINOSITY_HANDLE);
+}
+
+void suspendLuminosityTask() {
+    vTaskSuspend(LUMINOSITY_HANDLE);
+}
+
 void initLux() {
     pinMode(LDR_PIN, INPUT);
     currentLux = read_lux();
 
-    xTaskCreatePinnedToCore(taskCheckLux, "taskCheckLux", STACK_DEPTH, NULL, TASK_PRIORITY, NULL, APP_CPU_NUM);
+    xTaskCreatePinnedToCore(taskCheckLux, "taskCheckLux", LUX_STACK_DEPTH, NULL, LUX_TASK_PRIORITY, &LUMINOSITY_HANDLE
+, APP_CPU_NUM);
 }

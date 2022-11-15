@@ -1,4 +1,7 @@
 #include "button.h"
+#include <Arduino.h>
+#include "../Led/led.h"
+#include "../Log/logs.h"
 
 TaskHandle_t ISR = NULL;
 
@@ -8,7 +11,7 @@ void buttonTask(void *arg) {
   while (1) {
     vTaskSuspend(NULL);
     loginfo("[INTERRUPCAO] - BOTAO ACIONADO");
-    invertLed();
+    apagaLed();
 
     vTaskDelay(pdMS_TO_TICKS(BUTTON_DEBOUNCE));
   }
