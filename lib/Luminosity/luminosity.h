@@ -1,5 +1,5 @@
 // PINS
-#define LDR_PIN 27
+#define LDR_PIN 35
 
 // GAMMA
 #define GAMMA 0.7

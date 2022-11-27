@@ -6,6 +6,8 @@ void setup() {
   log_setlevel(0);
   delay(100);
 
+  initMqttClient();
+
   initLed();
   initButton();
   initLux();
