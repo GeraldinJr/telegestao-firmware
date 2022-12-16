@@ -9,9 +9,9 @@ float lastTemperature = 0;
 xTaskHandle TEMPERATURE_HANDLE;
 
 float readTemperature() {
-  int analogValue = analogRead(TEMPERATURE_PIN);
+  float analogValue = (float) analogRead(TEMPERATURE_PIN);
   //float celsius = 1 / (log(1 / (MAX_ANALOG / analogValue - 1.0)) / BETA + 1.0 / 298.15) - 273.15;
-  return (analogValue / 40) - 25.0;
+  return (analogValue / 40.0) - 25.0;
 }
 
 void taskCheckTemperature(void *params) {
@@ -20,10 +20,9 @@ void taskCheckTemperature(void *params) {
 
         if(abs(currentTemperature - lastTemperature) > SENSIBILITY) {
             lastTemperature = currentTemperature;
-            loginfo("Temperature: %.2f°C", currentTemperature);
 
             if(( currentTemperature > MAX_TEMPERATURE || currentTemperature < MIN_TEMPERATURE)) {
-                setLed(LOW);
+                apagaLed();
                 suspendAllByTemperature();
 
                 do {
@@ -48,6 +47,10 @@ void resumeTemperatureTask() {
 
 void suspendTemperatudeTask() {
     vTaskSuspend(TEMPERATURE_HANDLE);
+}
+
+float getTemperature() {
+    return readTemperature();
 }
 
 void initTemperature() {

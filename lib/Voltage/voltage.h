@@ -8,3 +8,4 @@
 void initVoltage();
 void resumeVoltageTask();
 void suspendVoltageTask();
+float getVoltage();

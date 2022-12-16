@@ -9,7 +9,7 @@ float lastVoltage = 0;
 xTaskHandle VOLTAGE_HANDLE;
 
 float readVoltage() {
-    return 10 * analogRead(VOLTAGE_PIN) / 4095.;
+    return 10.0 * (float) analogRead(VOLTAGE_PIN) / 4095.0;
 }
 
 void taskCheckVoltage(void *params) {
@@ -18,10 +18,9 @@ void taskCheckVoltage(void *params) {
 
         if(abs(currentVoltage - lastVoltage) > VOLTAGE_SENSIBILITY) {
             lastVoltage = currentVoltage;
-            loginfo("VOLTAGE: %.2fV", currentVoltage);
 
             if(currentVoltage > MAX_VOLTAGE) {
-                setLed(LOW);
+                apagaLed();
                 suspendAllByVoltage();
 
                 do {
@@ -46,6 +45,10 @@ void resumeVoltageTask() {
 
 void suspendVoltageTask() {
     vTaskSuspend(VOLTAGE_HANDLE);
+}
+
+float getVoltage() {
+    return readVoltage();
 }
 
 void initVoltage() {

@@ -8,12 +8,20 @@ float lastLux = 0;
 xTaskHandle LUMINOSITY_HANDLE;
 
 float read_lux() {
-  int analogValue = analogRead(LDR_PIN);
+  float analogValue = (float) analogRead(LDR_PIN);
   //float voltage = analogValue * VOLTAGE_COEFFICIENT;
   //float resistance = SENSOR_RESISTANCE * voltage / (1 - voltage / VIN);
   //float lux = pow(RL10 * pow(10, GAMMA) / resistance, INVERSE_GAMMA);
   
-  return analogValue / 2;
+  return analogValue / 2.0;
+}
+
+int getLedbyLux() {
+    if (currentLux > MIN_LUX) {
+        return 0;
+    }
+
+    return -70*currentLux/500+100;
 }
 
 void taskCheckLux(void *params) {
@@ -21,8 +29,8 @@ void taskCheckLux(void *params) {
         currentLux = read_lux();
 
         if(abs(currentLux - lastLux) > SENSIBILIDADE_LUMINOSIDADE) {
-            loginfo("Luminosity: %.2f lx", currentLux);
-            setLed(currentLux < MIN_LUX);
+            int led = getLedbyLux();
+            setLed(led);
 
             lastLux = currentLux;
         }
@@ -37,6 +45,10 @@ void resumeLuminosityTask() {
 
 void suspendLuminosityTask() {
     vTaskSuspend(LUMINOSITY_HANDLE);
+}
+
+float getLux() {
+    return read_lux();
 }
 
 void initLux() {

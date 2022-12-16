@@ -14,3 +14,4 @@
 void initTemperature();
 void resumeTemperatureTask();
 void suspendTemperatudeTask();
+float getTemperature();

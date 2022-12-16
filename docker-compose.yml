@@ -12,7 +12,7 @@ services:
       rede:
         ipv4_address: 10.5.0.5
     volumes:
-      - /Users/geraldo.junior/Documents/projetos/telegestao-firmware/nodered-data/data:/data
+      - /mnt/c/Users/geral/Documents/PlatformIO/Projects/telegestao-firmware/nodered-data/data:/data
 networks:
   rede:
     driver: bridge

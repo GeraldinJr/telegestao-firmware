@@ -8,3 +8,4 @@
 void initCurrent();
 void resumeCurrentTask();
 void suspendCurrentTask();
+float getCurrent();

@@ -9,7 +9,7 @@ float lastCurrent = 0;
 xTaskHandle CURRENT_HANDLE;
 
 float readCurrent() {
-    return 2 * analogRead(CURRENT_PIN) / 4095.;
+    return 2.0 * (float) analogRead(CURRENT_PIN) / 4095.0;
 }
 
 void taskCheckCurrent(void *params) {
@@ -18,10 +18,9 @@ void taskCheckCurrent(void *params) {
 
        if(abs(currentCurrent - lastCurrent) > CURRENT_SENSIBILITY) {
             lastCurrent = currentCurrent;
-            loginfo("CURRENT: %.2fA", currentCurrent);
 
             if(currentCurrent > MAX_CURRENT) {
-                setLed(LOW);
+                apagaLed();
                 suspendAllByCurrent();
 
                 do {
@@ -49,6 +48,10 @@ void resumeCurrentTask() {
 
 void suspendCurrentTask() {
     vTaskSuspend(CURRENT_HANDLE);
+}
+
+float getCurrent() {
+    return readCurrent();
 }
 
 void initCurrent() {

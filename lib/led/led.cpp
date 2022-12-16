@@ -1,34 +1,29 @@
 #include "led.h"
 
-uint8_t ledState;
+int ledState;
+
+int getDutyCycle() {
+    double fator = ledState/100.0;
+    return fator * 255;
+}
 
 void initLed() {
     pinMode(LED, OUTPUT);
-    ledState = LOW;
-    digitalWrite(LED, ledState);
-}
-
-void invertLed() {
-    ledState = !ledState;
-    digitalWrite(LED, ledState);
-}
-
-void acendeLed() {
-    ledState = HIGH;
-    digitalWrite(LED, ledState);
+    ledState = 0;
+    analogWrite(LED, getDutyCycle());
 }
 
 void apagaLed() {
-    ledState = LOW;
-    digitalWrite(LED, ledState);
+    ledState = 0;
+    analogWrite(LED, getDutyCycle());
 }
 
-void setLed(uint8_t state) {
+void setLed(int state) {
     ledState = state;
-    digitalWrite(LED, ledState);
+    analogWrite(LED, getDutyCycle());
 }
 
-uint8_t getLedState() {
+int getLedState() {
     return ledState;
 }
 

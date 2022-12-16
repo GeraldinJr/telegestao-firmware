@@ -22,3 +22,4 @@
 void initLux();
 void resumeLuminosityTask();
 void suspendLuminosityTask();
+float getLux();
